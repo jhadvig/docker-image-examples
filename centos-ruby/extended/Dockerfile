@@ -15,7 +15,3 @@ RUN yum install --assumeyes \
       mysql-libs mysql-devel postgresql-devel sqlite-devel \
       nodejs010-nodejs && \
       yum clean all # Clean up yum cache at the end.
-
-# Set RoR 'execjs' runtime to NodeJS v8
-#
-ENV EXECJS_RUNTIME Node

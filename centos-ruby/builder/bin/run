@@ -1,0 +1,20 @@
+#!/bin/bash -e
+
+source /opt/ruby/etc/sdk
+
+# FIXME: Is there any way to set a HOME directory based on USER instruction?
+# (bash -l doesn't help)
+#
+HOME="/opt/ruby"
+PATH="$HOME/bin:$PATH"
+
+export app_root_dir="${HOME}/src/${APP_ROOT:-.}"
+
+cd $app_root_dir
+
+if is_puma_installed; then
+  puma_cfg="/opt/ruby/etc/puma.cfg"
+  exec ruby_context bundle exec "puma --config $puma_cfg"
+else
+  exec ruby_context bundle exec "rackup -P ${HOME}/run/rack.pid --host 0.0.0.0"
+fi

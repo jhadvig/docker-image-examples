@@ -1,7 +1,7 @@
 #!/bin/sh
 
 cat <<EOF
-This is a Source To Image (STI) builder image.
+This is a base Ruby builder image.
 To use it, install STI: https://github.com/openshift/go-sti.
 
 Sample invocation:

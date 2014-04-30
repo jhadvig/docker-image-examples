@@ -1,49 +1,34 @@
 #!/bin/bash -e
 
 source /opt/ruby/etc/sdk
-
-# FIXME: Is there any way to set a HOME directory based on USER instruction?
-# (bash -l doesn't help)
-#
-HOME="/opt/ruby"
-PATH="$HOME/bin:$PATH"
+source /opt/ruby/etc/helpers
 
 app_runtime_dir="${HOME}/src"
 app_src_dir="/tmp/src"
 
-function print_usage() {
-  echo "This image can build your Ruby source code."
-  echo "To build from a git repo, run this in your checked out repo:"
-  echo
-  echo "  docker run -v \$(pwd):/tmp/src openshift/centos-ruby-builder"
-  echo
-  exit
-}
+# Allow users to inspect/debug the builder image itself, by using:
+# $ docker run -i -t openshift/centos-ruby-builder --debug
+#
+[ "$1" == "--debug" ] && exec /bin/bash
 
 # If the $app_src_dir is empty, then print usage and exit.
-(dir_is_empty $app_src_dir) && print_usage
+(dir_is_empty $app_src_dir) && print_usage_and_exit
 
 echo "---> Installing application source"
 cp -Rf ${app_src_dir}/* ${app_runtime_dir}/
 
+pushd "$app_runtime_dir/${APP_ROOT}" >/dev/null
 echo "---> Building your Ruby application from source"
 
-# In case the application itself reside in a subfolder and docker run
-# was invoked using -e "APP_ROOT=folder", we promote that folder as application
-# root.
-#
-app_root_dir="$app_runtime_dir/${APP_ROOT:-.}"
-BUNDLE_WITHOUT="development:test"
-
-cd $app_root_dir
-
-ruby_context bundle install --path ${HOME}/bundle --deployment
+bundle_install --path ${HOME}/bundle --deployment
 
 # TODO: Add `rake assets:precompile` step here for Rails applications
 # TODO: Add `rake db:migrate` if linked with DB container
 
+popd >/dev/null
+
 # Replace this script with the application runner at the end of the build.
 #
-mv -f /opt/ruby/bin/run /opt/ruby/bin/deploy
+mv -f /opt/ruby/bin/run /opt/ruby/bin/start
 
 echo "---> Build successful. Commit this image with: docker commit ${HOSTNAME} ruby-app"

@@ -16,12 +16,21 @@
 FROM openshift/centos-ruby-extended
 MAINTAINER Michal Fojtik <mfojtik@redhat.com>
 
-USER ruby
-
-# Set the initial command to build. After the application image is built
-# then the command is replaced by /opt/ruby/bin/run
+# Set the user we want the Ruby application run under and set the
+# user HOME directory as Docker reset this to '/' [1]
 #
-ADD ./bin/build /opt/ruby/bin/deploy
-ADD ./bin/run /opt/ruby/bin/run
+# [1] https://github.com/dotcloud/docker/issues/2968
+#
+USER ruby
+ENV  HOME /opt/ruby
+ENV  PATH $HOME/bin:$PATH
 
-ENTRYPOINT ["/opt/ruby/bin/deploy"]
+# Set the initial command to `build`. After the application image is built
+# then the command is replaced by `run`
+#
+ADD ./bin/build /opt/ruby/bin/start
+ADD ./bin/run   /opt/ruby/bin/run
+ADD ./etc       /opt/ruby/etc
+
+
+ENTRYPOINT ["/opt/ruby/bin/start"]

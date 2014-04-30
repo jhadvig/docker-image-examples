@@ -1,7 +1,3 @@
-function is_puma_installed() {
-  grep ' puma ' Gemfile.lock >/dev/null
-}
-
 function is_nodejs_installed() {
   (/usr/bin/scl -l | grep nodejs010) >/dev/null
 }

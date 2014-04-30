@@ -34,3 +34,26 @@ function print_usage_and_exit() {
 function is_puma_installed() {
   grep ' puma ' Gemfile.lock >/dev/null
 }
+
+function assets_compilation() {
+  if has_assets; then
+    echo
+    echo "Starting asset compilation."
+    /opt/ruby/bin/ruby_context bundle exec rake assets:precompile
+    echo
+  else
+    echo
+    echo "Compilation of assets is disabled or assets not detected."
+    echo
+  fi
+}
+
+function has_assets(){
+  [ ! -f Gemfile ] && return 1
+  [ ! -f Rakefile ] && return 1
+  ! grep " rails " Gemfile.lock >/dev/null && return 1
+  ! grep " execjs " Gemfile.lock >/dev/null && return 1
+  ! /opt/ruby/bin/ruby_context bundle exec "rake -T" | grep "assets:precompile" >/dev/null && return 1
+
+  return 0
+}
